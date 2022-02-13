@@ -27,7 +27,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "firebase": "firebase",
-    "predeploy": "npm run build && ejs ./firestore.rules.ejs -f ./src/email.json -o firestore.rules",
+    "configure": "ejs ./firestore.rules.ejs -f ./src/email.json -o firestore.rules",
+    "predeploy": "npm run build && npm run configure",
     "deploy": "firebase deploy"
   },
   "eslintConfig": {
