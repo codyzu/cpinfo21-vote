@@ -1,6 +1,15 @@
-import "bootswatch/dist/vapor/bootstrap.min.css";
+import "bootswatch/dist/quartz/bootstrap.min.css";
 
-import { Container, Row, Col, Progress, Button } from "reactstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Progress,
+  Button,
+  Card,
+  CardHeader,
+  CardBody,
+} from "reactstrap";
 import app from "./firebase";
 import {
   getAuth,
@@ -18,10 +27,15 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
+import emailList from "./email.json";
 
 const provider = new GoogleAuthProvider();
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+const emailRegExps = emailList.emails.map(
+  (email) => new RegExp(email.replace(".", "\\."))
+);
 
 function App() {
   const [user, setUser] = useState(null);
@@ -56,29 +70,60 @@ function App() {
     });
   }, [user, votePath]);
 
+  const canVote =
+    user && emailRegExps.some((regExp) => regExp.test(user.email));
+
   return (
-    <Container className="min-vh-100">
+    <Container className="min-vh-100 mt-3">
       <Row className="justify-content-end">
-        <Col className="text-end fs-4 align-middle">{user && user.email}</Col>
+        <Col className="d-flex justify-content-end align-items-center">
+          {user && user.email}
+        </Col>
         <Col xs="auto">
-          <Button
-            onClick={
-              user
-                ? () => signOut(auth)
-                : () => signInWithRedirect(auth, provider)
-            }
-            color={user ? "secondary" : "success"}
-          >
-            {user ? "Logout" : "Login"}
-          </Button>
+          {user ? (
+            <Button onClick={() => signOut(auth)} color="danger">
+              Logout
+            </Button>
+          ) : (
+            <Button
+              onClick={() => signInWithRedirect(auth, provider)}
+              color="success"
+            >
+              Login
+            </Button>
+          )}
         </Col>
       </Row>
-      <Row>
-        <Col>Vote:</Col>
+      <Row className="mt-4">
+        <Col className="text-center">
+          <h1>CPINFO-21 Final Exam Vote</h1>
+        </Col>
       </Row>
-      <Row>
-        <Col>Here</Col>
-        <Col>Here</Col>
+      <Row className="">
+        <Col xs={4}>
+          <Row>
+            <Col>Exam</Col>
+          </Row>
+          <Row>
+            <Col>{exam}</Col>
+          </Row>
+        </Col>
+        <Col xs={4}>
+          <Row className="text-center">
+            <Col>Total</Col>
+          </Row>
+          <Row className="text-center">
+            <Col>{exam + hackathon}</Col>
+          </Row>
+        </Col>
+        <Col xs={4}>
+          <Row>
+            <Col className="text-end">Hackathon</Col>
+          </Row>
+          <Row>
+            <Col className="text-end">{hackathon}</Col>
+          </Row>
+        </Col>
       </Row>
       <Row>
         <Col>
@@ -88,47 +133,70 @@ function App() {
               bar
               value={exam}
               max={exam + hackathon}
-              color="danger"
+              color="primary"
             >
-              Exam {exam}
+              <h6>Exam {exam}</h6>
             </Progress>
             <Progress
               animated
               bar
               value={hackathon}
               max={exam + hackathon}
-              color="success"
+              color="info"
             >
-              Hackathon {hackathon}
+              <h6>Hackathon {hackathon}</h6>
             </Progress>
           </Progress>
         </Col>
       </Row>
-      <Row>
-        <Col>
-          <Button
-            disabled={
-              !user || !user.email.endsWith("iut-acy.univ-smb.fr") || vote?.exam
-            }
-            onClick={() =>
-              setDoc(doc(db, votePath), { exam: true, hackathon: false })
-            }
-          >
-            Exam
-          </Button>
-          <Button
-            disabled={
-              !user ||
-              !user.email.endsWith("iut-acy.univ-smb.fr") ||
-              vote?.hackathon
-            }
-            onClick={() =>
-              setDoc(doc(db, votePath), { exam: false, hackathon: true })
-            }
-          >
-            Hackathon
-          </Button>
+      <Row className="mt-4">
+        <Col></Col>
+        <Col xs={12} sm={10} md={8} lg={6} xl={4}>
+          <Card className="border-success">
+            <CardHeader>Cast your vote</CardHeader>
+            <CardBody>
+              <Container fluid>
+                <Row>
+                  <Col>
+                    <Button
+                      className="w-100"
+                      onClick={() =>
+                        setDoc(doc(db, votePath), {
+                          exam: true,
+                          hackathon: false,
+                          email: user.email,
+                        })
+                      }
+                      active={!vote?.exam}
+                      disabled={!canVote}
+                      color={vote?.exam ? "success" : "secondary"}
+                    >
+                      Exam
+                    </Button>
+                  </Col>
+                  <Col>
+                    <Button
+                      className="w-100"
+                      onClick={() =>
+                        setDoc(doc(db, votePath), {
+                          exam: false,
+                          hackathon: true,
+                          email: user.email,
+                        })
+                      }
+                      active={!vote?.hackathon}
+                      disabled={!canVote}
+                      color={vote?.hackathon ? "success" : "secondary"}
+                    >
+                      Hackathon
+                    </Button>
+                  </Col>
+                </Row>
+              </Container>
+            </CardBody>
+          </Card>
         </Col>
+        <Col></Col>
       </Row>
     </Container>
   );

@@ -10,7 +10,7 @@ service cloud.firestore {
       
       function isAuthenticated() {
       	return request.auth != null
-          && (request.auth.token.email.matches('.*@iut-acy[.]univ-smb[.]fr') || request.auth.token.email.matches('.*cody[.]zuschlag@gmail[.]com'));
+          && (<%- emails.map(email => `request.auth.token.email.matches('.*${email.replaceAll('.', '[.]')}')`).join(' || ') %>);
       }
       
       allow read: if true;
