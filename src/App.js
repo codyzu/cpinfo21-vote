@@ -153,7 +153,7 @@ function App() {
         <Col></Col>
         <Col xs={12} sm={10} md={8} lg={6} xl={4}>
           <Card className="border-success">
-            <CardHeader>Cast your vote</CardHeader>
+            <CardHeader className="text-center">Cast your vote</CardHeader>
             <CardBody>
               <Container fluid>
                 <Row>
