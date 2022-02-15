@@ -14,9 +14,10 @@ service cloud.firestore {
       }
       
       allow read: if true;
-      allow update: if isAuthenticated() && request.auth.uid == userId	&& isValid();
-      allow delete: if isAuthenticated() && request.auth.uid == userId;
-      allow create: if isAuthenticated() && isValid();
+      // allow update: if isAuthenticated() && request.auth.uid == userId	&& isValid();
+      // allow delete: if isAuthenticated() && request.auth.uid == userId;
+      // allow create: if isAuthenticated() && isValid();
+      allow write: if false;
     }
   }
 }
